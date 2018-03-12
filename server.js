@@ -8,6 +8,7 @@ const suits = _.range(1, 5);
 const deck = _.concat(_.product(ranks, suits), [JOKER]);
 
 let characters = {};
+let drawnCards = _([]);
 
 const bot = new Eris.CommandClient(process.env.DISCORD_BOT_TOKEN, {}, {
   description: 'Savage Worlds helper bot',
@@ -58,6 +59,29 @@ bot.registerCommand('clearchars', (msg, args) => {
   return 'Unregistered all characters.';
 });
 
+function prettyCard(card) {
+  if (card === JOKER) {
+    return ':black_joker:';
+  }
+
+  const [rank, suit] = card;
+  const prettyRank = {
+    11: 'J',
+    12: 'Q',
+    13: 'K',
+    14: 'A',
+  };
+
+  const prettySuit = {
+    1: ':spades:',
+    2: ':hearts:',
+    3: ':diamonds:',
+    4: ':clubs:',
+  };
+
+  return prettySuit[suit] + (prettyRank[rank] || rank);
+};
+
 bot.registerCommand('initiative', (msg, args) => {
   const tempActors = _.map(args, name => ({ name }));
   const actors = _.concat(_.values(characters), tempActors);
@@ -67,29 +91,6 @@ bot.registerCommand('initiative', (msg, args) => {
   } else if (actors.length > deck.length) {
     return 'DOES NOT COMPUTE';
   }
-  
-  function prettyCard(card) {
-    if (card === JOKER) {
-      return ':black_joker:';
-    }
-    
-    const [rank, suit] = card;
-    const prettyRank = {
-      11: 'J',
-      12: 'Q',
-      13: 'K',
-      14: 'A',
-    };
-    
-    const prettySuit = {
-      1: ':spades:',
-      2: ':hearts:',
-      3: ':diamonds:',
-      4: ':clubs:',
-    };
-    
-    return prettySuit[suit] + (prettyRank[rank] || rank);
-  };
   
   function prettyNth(numberN) {
     const n = '' + (numberN + 1);
@@ -121,9 +122,11 @@ bot.registerCommand('initiative', (msg, args) => {
     return emojiSet[index];
   }
   
-  const rows = _(deck)
+  drawnCards = _(deck)
     .shuffle()
-    .take(actors.length)
+    .take(actors.length);
+  
+  const rows = drawnCards
     .zip(actors)
     .sortBy('0.0', '0.1').reverse()
     .map(([card, actor], i, pairs) => ({
@@ -142,6 +145,24 @@ bot.registerCommand('initiative', (msg, args) => {
         inline: true
       })),
     }
+  };
+});
+
+bot.registerCommand('redraw', (msg, args) => {
+  const newCard = _(deck)
+    .without(drawnCards)
+    .shuffle()
+    .first();
+  
+  drawnCards.push(newCard);
+  
+  return {
+    embed: {
+      title: 'New Card',
+      color: 0xFF5000,
+      author: characters[msg.author.username],
+      description: `**${prettyCard(newCard)}**`,
+    },
   };
 });
  
