@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const _ = require('lodash');
 const Eris = require('eris');
 const Roll = require('roll');
@@ -15,16 +17,29 @@ const buildCommands = require('./commands');
 //   //console.log(doc.data())
 // });
 
-const bot = new Eris.CommandClient(process.env.DISCORD_BOT_TOKEN, {}, {
-  description: 'Savage Worlds helper bot',
-  owner: 'Swift',
-  prefix: process.env.DISCORD_BOT_PREFIX,
-});
+const bot = new Eris.CommandClient(
+  process.env.DISCORD_BOT_TOKEN,
+  {},
+  {
+    description: 'Savage Worlds helper bot',
+    owner: 'Swift',
+    prefix: process.env.DISCORD_BOT_PREFIX
+  }
+);
 
 const characters = {};
-const drawnCards = _([]);
 
-const { myCharCommand, testCommand, charsCommand, clearCommand, initiativeCommand, redrawCommand, rollCommand, charSheetCommand, shuffleCommand } = buildCommands({ bot, characters, drawnCards, roll: new Roll() });
+const {
+  myCharCommand,
+  testCommand,
+  charsCommand,
+  clearCommand,
+  initiativeCommand,
+  redrawCommand,
+  rollCommand,
+  charSheetCommand,
+  shuffleCommand
+} = buildCommands({ bot, characters, roll: new Roll() });
 
 bot.registerCommand('mychar', myCharCommand);
 bot.registerCommand('testchars', testCommand);
