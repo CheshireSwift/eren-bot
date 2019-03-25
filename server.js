@@ -38,7 +38,8 @@ const {
   redrawCommand,
   rollCommand,
   charSheetCommand,
-  shuffleCommand
+  shuffleCommand,
+  removeCommand
 } = buildCommands({ bot, characters, roll: new Roll() });
 
 bot.registerCommand('mychar', myCharCommand);
@@ -49,6 +50,7 @@ bot.registerCommand('initiative', initiativeCommand);
 bot.registerCommand('redraw', redrawCommand);
 bot.registerCommand('draw', redrawCommand);
 bot.registerCommand('shuffle', shuffleCommand);
+bot.registerCommand('removechar', removeCommand);
 //bot.registerCommand('roll', rollCommand);
 //bot.registerCommand('charsheet', charSheetCommand);
 

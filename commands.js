@@ -76,6 +76,28 @@ function buildCommands({ bot, characters, roll } = {}) {
       
       return 'Unregistered all characters.';
     },
+
+    removeCommand: async (msg, args) => {
+      if (args.length === 0) {
+        const char = characters[msg.author.id]
+        if (char) {
+          _.unset(characters, msg.author.id)
+          return `Unregistered ${char.name}.`
+        } else {
+          return `No character registered for ${msg.author.username}.`
+        }
+      }
+
+      const found = []
+      _.forEach(characters, (char, key) => {
+        if (_.includes(args, char.name) || _.includes(args, char.player)) {
+          _.unset(characters, key)
+          found.push(char.name)
+        }
+      })
+
+      return `Unregistered ${found.join(', ')}.`;
+    },
     
     initiativeCommand: async (msg, args) => {
       const tempActors = _.map(args, name => ({ name }));

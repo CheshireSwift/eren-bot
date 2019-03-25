@@ -58,6 +58,39 @@ describe('the bot commands', () => {
       
       expect(_.isEmpty(characters)).toBe(true);
     });
+    
+    it('removes specific characters when requested', async () => {
+      const characters = {
+        1234: { name: 'Waffles', player: 'Alice' },
+        5678: { name: 'Pickles', player: 'Bob' },
+      };
+      
+      const { removeCommand } = buildCommands({ characters });
+      
+      await removeCommand({}, ['Pickles']);
+      
+      expect(_.size(characters)).toBe(1);
+    });
+
+    it('removes the author character if not specified', async () => {
+      const author = {
+        username: 'Alice',
+        id: '1234',
+      };
+
+      const characters = {
+        [author.id]: { name: 'Zarathur', player: author.username}
+      }
+
+      const { removeCommand } = buildCommands({ characters })
+
+      const msg = { author };
+      const args = [];
+
+      await removeCommand(msg, args);
+
+      expect(characters[msg.author.id]).toBeFalsy()
+    });
   });
   
   describe('initiative', () => {
