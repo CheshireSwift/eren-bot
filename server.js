@@ -1,5 +1,8 @@
 require('dotenv').config();
 
+const fs = require('fs');
+const { promisify } = require('util');
+const writeFile = promisify(fs.writeFile);
 const _ = require('lodash');
 const Eris = require('eris');
 const Roll = require('roll');
@@ -27,7 +30,13 @@ const bot = new Eris.CommandClient(
   }
 );
 
-const characters = {};
+const characters = fs.existsSync(process.env.CHARACTERS_STORE_PATH)
+  ? JSON.parse(fs.readFileSync(process.env.CHARACTERS_STORE_PATH, 'utf8'))
+  : {};
+
+console.log(`Loaded ${_.size(characters)} characters from ${process.env.CHARACTERS_STORE_PATH}`);
+
+const saveChars = () => writeFile(process.env.CHARACTERS_STORE_PATH, JSON.stringify(characters, null, 2), 'utf8')
 
 const {
   myCharCommand,
@@ -40,7 +49,7 @@ const {
   charSheetCommand,
   shuffleCommand,
   removeCommand
-} = buildCommands({ bot, characters, roll: new Roll() });
+} = buildCommands({ bot, characters, roll: new Roll(), saveChars });
 
 bot.registerCommand('mychar', myCharCommand);
 bot.registerCommand('testchars', testCommand);

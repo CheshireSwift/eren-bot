@@ -4,13 +4,20 @@ const _ = require('lodash');
 
 const buildCommands = require('./commands');
 
+const saveChars = () => {};
+
 describe('the bot commands', () => {
   const channel = { id: 123 };
+
+  afterEach(async () => {
+    const { shuffleCommand } = buildCommands({ characters: {}, saveChars });
+    await shuffleCommand();
+  })
   
   describe('character registry', () => {
     it('adds new characters with the `mychar` command', async () => {
       const characters = {};
-      const { myCharCommand } = buildCommands({ characters })
+      const { myCharCommand } = buildCommands({ characters, saveChars })
       
       const charName = 'Zarathur the Inhospitable'
       const author = {
@@ -36,7 +43,7 @@ describe('the bot commands', () => {
         5678: { name: 'Pickles', player: 'Bob' },
       };
       
-      const { charsCommand } = buildCommands({ bot, characters })
+      const { charsCommand } = buildCommands({ bot, characters, saveChars })
       
       const msg = { channel };
       await charsCommand(msg);
@@ -52,7 +59,7 @@ describe('the bot commands', () => {
         b: 2,
       };
       
-      const { clearCommand } = buildCommands({ characters });
+      const { clearCommand } = buildCommands({ characters, saveChars });
       
       await clearCommand();
       
@@ -65,7 +72,7 @@ describe('the bot commands', () => {
         5678: { name: 'Pickles', player: 'Bob' },
       };
       
-      const { removeCommand } = buildCommands({ characters });
+      const { removeCommand } = buildCommands({ characters, saveChars });
       
       await removeCommand({}, ['Pickles']);
       
@@ -82,7 +89,7 @@ describe('the bot commands', () => {
         [author.id]: { name: 'Zarathur', player: author.username}
       }
 
-      const { removeCommand } = buildCommands({ characters })
+      const { removeCommand } = buildCommands({ characters, saveChars })
 
       const msg = { author };
       const args = [];
@@ -112,7 +119,7 @@ describe('the bot commands', () => {
         Bob: { name: 'Pickles' },
       };
 
-      const { initiativeCommand } = buildCommands({ characters, bot });
+      const { initiativeCommand } = buildCommands({ characters, bot, saveChars });
 
       const msg = { channel };
       const args = ['Gribbly'];
@@ -145,7 +152,7 @@ describe('the bot commands', () => {
         const username = 'Carolyn';
         const msg = { author: { username }, channel };
         
-        const { initiativeCommand, redrawCommand } = buildCommands({ characters, bot });
+        const { initiativeCommand, redrawCommand } = buildCommands({ characters, bot, saveChars });
 
         await initiativeCommand(msg);
 
@@ -164,7 +171,7 @@ describe('the bot commands', () => {
       });
 
       xit('updates the previous initiative message when the card is redrawn', async () => {
-        const { initiativeCommand, redrawCommand } = buildCommands({ characters, bot });
+        const { initiativeCommand, redrawCommand } = buildCommands({ characters, bot, saveChars });
         
         await initiativeCommand({ author: {}, channel });
         const [cardsField, charsField] = lastMessage.embed.fields;

@@ -38,7 +38,7 @@ function remainingDeck() {
     .shuffle();
 };
 
-function buildCommands({ bot, characters, roll } = {}) {
+function buildCommands({ bot, characters, roll, saveChars } = {}) {
   return {
     myCharCommand: async (msg, args) => {
       const char = {
@@ -48,6 +48,8 @@ function buildCommands({ bot, characters, roll } = {}) {
       };
 
       characters[msg.author.id] = char;
+
+      saveChars();
 
       return {
         content: 'Registered Character',
@@ -66,9 +68,12 @@ function buildCommands({ bot, characters, roll } = {}) {
           icon_url: bot.avatarURL,
         };
       });
+
+      saveChars();
       
       return 'Registered bot characters'
     },
+
     charsCommand: async (msg, args) => {
       _.forEach(characters, char => {
         bot.createMessage(msg.channel.id, { embed: { author: char } });
@@ -79,6 +84,8 @@ function buildCommands({ bot, characters, roll } = {}) {
       _.forEach(characters, (char, key) => {
         _.unset(characters, key);
       });
+
+      saveChars();
       
       return 'Unregistered all characters.';
     },
@@ -88,6 +95,9 @@ function buildCommands({ bot, characters, roll } = {}) {
         const char = characters[msg.author.id]
         if (char) {
           _.unset(characters, msg.author.id)
+
+          saveChars();
+
           return `Unregistered ${char.name}.`
         } else {
           return `No character registered for ${msg.author.username}.`
@@ -101,6 +111,8 @@ function buildCommands({ bot, characters, roll } = {}) {
           found.push(char.name)
         }
       })
+
+      saveChars();
 
       return `Unregistered ${found.join(', ')}.`;
     },
