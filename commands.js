@@ -4,7 +4,7 @@ require('lodash.product');
 const JOKER = [Infinity, Infinity];
 const ranks = _.range(2, 15);
 const suits = _.range(1, 5);
-const deck = _.concat(_.product(ranks, suits), [JOKER]);
+const deck = _.concat(_.product(ranks, suits), [JOKER, JOKER]);
 
 let drawnCards = [];
 let lastInitiativeMessage = Promise.resolve();
@@ -30,6 +30,12 @@ function prettyCard(card) {
   };
 
   return prettySuit[suit] + (prettyRank[rank] || rank);
+};
+
+function remainingDeck() {
+  return _(deck)
+    .reject(card => _(drawnCards).find(drawnCard => _.isEqual(drawnCard, card)))
+    .shuffle();
 };
 
 function buildCommands({ bot, characters, roll } = {}) {
@@ -139,12 +145,17 @@ function buildCommands({ bot, characters, roll } = {}) {
         return emojiSet[index];
       }
 
-      drawnCards = _(deck)
-        .shuffle()
+      if (drawnCards.includes(JOKER)) {
+        drawnCards = [];
+      }
+
+      const newCards = remainingDeck()
         .take(actors.length)
         .value();
 
-      const rows = _(drawnCards)
+      drawnCards.push(...newCards);
+
+      const rows = _(newCards)
         .zip(actors)
         .sortBy('0.0', '0.1').reverse()
         .map(([card, actor], i, pairs) => ({
@@ -176,10 +187,7 @@ function buildCommands({ bot, characters, roll } = {}) {
         return 'Deck is empty!';
       }
       
-      const newCard = _(deck)
-        .reject(card => _(drawnCards).find(drawnCard => _.isEqual(drawnCard, card)))
-        .shuffle()
-        .first();
+      const newCard = remainingDeck().first();
 
       drawnCards.push(newCard);
       
